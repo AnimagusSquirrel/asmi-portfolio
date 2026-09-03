@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS  —  single source of truth (mirrors Figma)
+
+   Token            Tailwind          Hex
+   --------------------------------------------------
+   accent           lime-300          #bbf451
+   surface-default  stone-100         #f5f5f4
+   surface-pops     stone-50          #fafaf9
+   text-primary     stone-800         #292524
+   text-secondary   stone-400         #a6a09b
+   border-subtle    stone-200         #e7e5e4
+   state-hover      #292623 @ 8%
+============================================================ */
+
+@theme {
+  --color-accent: #bbf451;
+  --color-surface-default: #f5f5f4;
+  --color-surface-pops: #fafaf9;
+  --color-text-primary: #292524;
+  --color-text-secondary: #a6a09b;
+  --color-border-subtle: #e7e5e4;
+  --color-state-hover: rgba(41, 38, 35, 0.08);
+
+  --font-heading: var(--font-sanchez), Georgia, serif;
+  --font-body: var(--font-dm-sans), "Helvetica Neue", Arial, sans-serif;
+
+  --shadow-card: 0px 2px 4px 0px rgba(41, 38, 35, 0.12),
+    0px 8px 20.6px 0px rgba(41, 38, 35, 0.04);
+  --shadow-pop: 0px 2px 2px 0px rgba(41, 38, 35, 0.12),
+    0px 8px 10.3px 0px rgba(41, 38, 35, 0.04);
+}
+
+/* Tailwind's numeric spacing scale is already a 4pt system
+   (p-1 = 4px … p-20 = 80px … p-32 = 128px). Use it; no arbitrary values. */
+
+/* ============================================================
+   RESET + BASE
+============================================================ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
+::selection {
+  background: rgba(41, 37, 36, 0.15);
+}
+
+/* ============================================================
+   TYPE SCALE
+   Mobile values by default; desktop values from 768px up.
+   Usage stays identical across breakpoints — only size/leading change.
+============================================================ */
+
+.t-heading {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.t-subheading {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+.t-body-lg {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.t-button {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+@media (min-width: 768px) {
+  .t-heading    { font-size: 40px; line-height: 52px; }
+  .t-subheading { font-size: 32px; line-height: 42px; }
+  .t-body-lg    { font-size: 24px; line-height: 32px; }
+  .t-body       { font-size: 20px; line-height: 26px; }
+  .t-button     { font-size: 24px; line-height: 32px; }
+}
+
+/* Section label — the playful Sanchez lines that head each section */
+.section-label {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 768px) {
+  .section-label { font-size: 40px; line-height: 52px; }
+}
+
+/* ============================================================
+   GRID CONTAINER
+   Figma frames: 393 mobile (~24 margin) · 1920 desktop (240 margin, 1440 content)
+============================================================ */
+
+.grid-container {
+  width: 100%;
+  max-width: 1920px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+@media (min-width: 768px) {
+  .grid-container { padding-inline: 80px; }
+}
+
+@media (min-width: 1440px) {
+  .grid-container { padding-inline: 120px; }
+}
+
+@media (min-width: 1920px) {
+  .grid-container { padding-inline: 240px; }
+}
