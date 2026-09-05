@@ -44,7 +44,9 @@ function Doodle({
       }}
       className={cn(
         "absolute z-[6] cursor-grab touch-none select-none active:cursor-grabbing",
-        variant === "mobile" ? "md:hidden" : "hidden min-[1600px]:block",
+        variant === "mobile"
+          ? "md:hidden"
+          : "invisible pointer-events-none min-[1600px]:visible min-[1600px]:pointer-events-auto",
       )}
     />
   );

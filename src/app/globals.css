@@ -103,64 +103,82 @@
 
 /* ============================================================
    TYPE SCALE
-   Mobile values by default; desktop values from 768px up.
+   Fluid between the two Figma checkpoints (mobile 393 / desktop
+   1920) using clamp(min, preferred, max): below 768px this
+   resolves to the exact mobile value, above 1920px to the exact
+   desktop value, and in between it scales continuously with
+   viewport width — matching how Figma Mirror/Present scales the
+   whole frame, instead of snapping to the desktop size at 768px
+   and holding it fixed on every screen up to 4K.
    Usage stays identical across breakpoints — only size/leading change.
 ============================================================ */
 
 .t-heading {
   font-family: var(--font-heading);
   font-weight: 400;
-  font-size: 20px;
-  line-height: 28px;
+  font-size: clamp(20px, 6.667px + 1.7361vw, 40px);
+  line-height: clamp(28px, 12px + 2.0833vw, 52px);
 }
 
 .t-subheading {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 20px;
-  line-height: 26px;
+  font-size: clamp(20px, 12px + 1.0417vw, 32px);
+  line-height: clamp(26px, 15.333px + 1.3889vw, 42px);
 }
 
 .t-body-lg {
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
+  font-size: clamp(16px, 10.667px + 0.6944vw, 24px);
+  line-height: clamp(20px, 12px + 1.0417vw, 32px);
 }
 
 .t-body {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 14px;
-  line-height: 18px;
+  font-size: clamp(14px, 10px + 0.5208vw, 20px);
+  line-height: clamp(18px, 12.667px + 0.6944vw, 26px);
 }
 
 .t-button {
   font-family: var(--font-heading);
   font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
-}
-
-@media (min-width: 768px) {
-  .t-heading    { font-size: 40px; line-height: 52px; }
-  .t-subheading { font-size: 32px; line-height: 42px; }
-  .t-body-lg    { font-size: 24px; line-height: 32px; }
-  .t-body       { font-size: 20px; line-height: 26px; }
-  .t-button     { font-size: 24px; line-height: 32px; }
+  font-size: clamp(16px, 10.667px + 0.6944vw, 24px);
+  line-height: clamp(20px, 12px + 1.0417vw, 32px);
 }
 
 /* Section label — the playful Sanchez lines that head each section */
 .section-label {
   font-family: var(--font-heading);
   font-weight: 400;
-  font-size: 20px;
-  line-height: 28px;
+  font-size: clamp(20px, 6.667px + 1.7361vw, 40px);
+  line-height: clamp(28px, 12px + 2.0833vw, 52px);
   color: var(--color-text-secondary);
 }
 
-@media (min-width: 768px) {
-  .section-label { font-size: 40px; line-height: 52px; }
+/* ============================================================
+   NAVBAR — DESKTOP PILL FLUID SPACING
+   Figma only specifies this pill at the 1920 desktop frame (mobile
+   nav is a different hamburger/drawer composition, not a smaller
+   version of this pill). Below is an approximation — min values are
+   the desktop value scaled by ~0.667 — flagged for Asmi to nudge
+   once compared against the design at in-between window widths.
+============================================================ */
+
+.nav-pill {
+  padding: clamp(10.67px, 7.12px + 0.4625vw, 16px);
+}
+
+.nav-links {
+  gap: clamp(26.68px, 17.8px + 1.1563vw, 40px);
+}
+
+.nav-link {
+  height: clamp(32.68px, 21.8px + 1.4167vw, 49px);
+  padding-inline: clamp(16px, 10.667px + 0.6944vw, 24px);
+  padding-block: clamp(5.34px, 3.567px + 0.2309vw, 8px);
+  font-size: clamp(12px, 8px + 0.5208vw, 18px);
 }
 
 /* ============================================================
