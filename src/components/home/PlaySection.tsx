@@ -16,8 +16,8 @@ export default function PlaySection() {
         <p className="section-label max-w-[16rem] md:max-w-none">
           I like playing around ¯\_(ツ)_/¯
         </p>
-        <Link href="/play" className="shrink-0 md:hidden">
-          <AccentButton static>Play</AccentButton>
+        <Link href="/play" className="shrink-0">
+          <AccentButton static>Play ⪼</AccentButton>
         </Link>
       </div>
 

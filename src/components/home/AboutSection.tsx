@@ -56,12 +56,12 @@ export default function AboutSection() {
         </ul>
       </div>
 
-      {/* Doodle note (mobile only) */}
+      {/* Doodle note */}
       <img
         src="/images/hero/about-doodle-note.svg"
         alt=""
         aria-hidden="true"
-        className="mx-auto w-[240px] md:hidden"
+        className="w-[160px] md:w-[240px]"
       />
 
       <div className="flex md:justify-start">

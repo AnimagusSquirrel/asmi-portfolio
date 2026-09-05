@@ -39,64 +39,66 @@
    RESET + BASE
 ============================================================ */
 
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  min-height: 100vh;
-  background: var(--color-surface-default);
-  color: var(--color-text-primary);
-  font-family: var(--font-body);
-  overflow-x: hidden;
-}
+  body {
+    min-height: 100vh;
+    background: var(--color-surface-default);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
 
-img,
-picture,
-svg {
-  display: block;
-  max-width: 100%;
-}
+  img,
+  picture,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: inherit;
-}
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-ul,
-ol {
-  list-style: none;
-}
+  ul,
+  ol {
+    list-style: none;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 400;
-}
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+  }
 
-::selection {
-  background: rgba(41, 37, 36, 0.15);
+  ::selection {
+    background: rgba(41, 37, 36, 0.15);
+  }
 }
 
 /* ============================================================
@@ -183,4 +185,78 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (min-width: 1920px) {
   .grid-container { padding-inline: 240px; }
+}
+
+/* ============================================================
+   CONTAINER — DESKTOP (fluid, 12-col / 24px gutter grid)
+   Content-area width grows continuously with viewport, derived
+   from three Figma checkpoints: 720px@768 · 784px@1024 · locks
+   at 1440px@1600 (margin absorbs all growth above that).
+   Mobile (<768px) matches .grid-container's base exactly.
+============================================================ */
+
+.container-desktop {
+  width: 100%;
+  padding-inline: 24px;
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .container-desktop {
+    --content-w: calc(528px + 25vw); /* 720px@768 -> 784px@1024 */
+    width: min(100%, var(--content-w));
+    margin-inline: auto;
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1599.98px) {
+  .container-desktop {
+    --content-w: calc(113.9vw - 382px); /* 784px@1024 -> 1440px@1600 */
+    width: min(100%, var(--content-w));
+    margin-inline: auto;
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container-desktop {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 0;
+  }
+}
+
+/* ============================================================
+   FEATURED PROJECT ROW — image/text ratio (12-col grid)
+   Below the 960px content threshold (where 5/12 < 400px text
+   floor), text is pinned at 400px and media fills the rest.
+   Above it, media:text follows a fixed 7:5 flex-grow ratio.
+   Uses a container query on the row itself so it tracks the
+   row's actual rendered width, not the viewport.
+============================================================ */
+
+@media (min-width: 768px) {
+  .project-row {
+    container-type: inline-size;
+  }
+
+  .project-row .project-media {
+    flex: 1 1 0%;
+  }
+
+  .project-row .project-content {
+    flex: 0 0 400px;
+    min-width: 400px;
+  }
+
+  @container (min-width: 960px) {
+    .project-row .project-media {
+      flex: 7 1 0%;
+    }
+
+    .project-row .project-content {
+      flex: 5 1 0%;
+    }
+  }
 }

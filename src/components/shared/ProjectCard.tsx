@@ -11,10 +11,10 @@ export default function ProjectCard({ project }: { project: Project }) {
     <article className="w-full">
       <Link
         href={`/work/${project.slug}`}
-        className="group block md:flex md:items-center md:gap-6"
+        className="project-row group block md:flex md:items-center md:gap-6"
       >
         {/* Media */}
-        <div className="relative h-[195px] w-full shrink-0 overflow-hidden rounded-[3px] bg-text-secondary shadow-[var(--shadow-card)] md:h-[468px] md:w-[830px] md:rounded-lg">
+        <div className="project-media relative h-[195px] w-full overflow-hidden rounded-[3px] bg-text-secondary shadow-[var(--shadow-card)] md:h-[468px] md:rounded-lg">
           <img
             src={project.image}
             alt={project.title}
@@ -26,7 +26,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
 
         {/* Content */}
-        <div className="mt-5 flex flex-col gap-3 md:mt-0 md:flex-1 md:gap-10 md:py-6">
+        <div className="project-content mt-5 flex flex-col gap-3 md:mt-0 md:gap-10 md:py-6">
           <h3 className="t-subheading text-text-primary">{project.title}</h3>
 
           <div className="flex flex-col gap-3 md:items-end md:gap-6">
