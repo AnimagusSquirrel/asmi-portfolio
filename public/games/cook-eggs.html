@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Egg Timer &lt;3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=VT323&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg-grad-start: #f7c9dd;
+    --bg-grad-end: #c9b6f2;
+    --window-bg: #fbe9a0;
+    --window-border: #8a5a34;
+    --title-bg: #ffe066;
+    --title-text: #e2572b;
+    --btn-orange: #f7ad78;
+    --btn-orange-dark: #e2572b;
+    --cream: #fff8e7;
+    --cream-dark: #f3e2b8;
+    --egg-white: #fffaf0;
+    --egg-yolk: #f5a623;
+    --egg-yolk-dark: #d98a12;
+    --text-dark: #6b4a2b;
+    --mint: #bfe8cf;
+    --pink-soft: #f6c9d8;
+    --burner-dark: #6b4a2b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Quicksand', sans-serif;
+    color: var(--text-dark);
+    background: linear-gradient(160deg, var(--bg-grad-start), var(--bg-grad-end));
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 12px 56px;
+    overflow-x: hidden;
+  }
+
+  .vt { font-family: 'VT323', monospace; }
+
+  /* ---------- pixel-notched corner trick ---------- */
+  .pixel-corners {
+    clip-path: polygon(
+      0 8px, 8px 8px, 8px 0,
+      calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+      100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+      8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+    );
+  }
+  .pixel-corners-sm {
+    clip-path: polygon(
+      0 4px, 4px 4px, 4px 0,
+      calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+      4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+    );
+  }
+
+  /* ---------- retro window ---------- */
+  .retro-window {
+    background: var(--window-bg);
+    border: 4px solid var(--window-border);
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.15);
+  }
+  .title-bar {
+    background: var(--title-bg);
+    border-bottom: 4px solid var(--window-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+  }
+  .title-text { color: var(--title-text); font-size: 1.5rem; letter-spacing: 0.5px; }
+  .win-btn {
+    width: 26px; height: 26px;
+    background: var(--btn-orange);
+    border: 2px solid var(--btn-orange-dark);
+    color: var(--btn-orange-dark);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; margin-left: 6px;
+  }
+  .win-btn:hover { filter: brightness(1.08); }
+  .win-btn:active { transform: translateY(1px); }
+
+  .window-body {
+    transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.35s ease;
+    overflow: hidden;
+  }
+  #gameWindow.minimized .window-body {
+    max-height: 0 !important;
+    opacity: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  #gameWindow.closed {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .pastel-btn {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    background: var(--cream);
+    border: 3px solid var(--btn-orange-dark);
+    color: var(--btn-orange-dark);
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .pastel-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .pastel-btn:active { transform: translateY(1px); }
+  .pastel-btn.small { padding: 4px 10px; font-size: 0.8rem; }
+  .pastel-btn.primary { background: var(--btn-orange); }
+  .pastel-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* ---------- pantry ---------- */
+  .panel-label {
+    font-family: 'VT323', monospace;
+    font-size: 1.05rem;
+    color: var(--btn-orange-dark);
+    margin-bottom: 6px;
+  }
+  .panel {
+    background: var(--cream);
+    border: 3px solid var(--window-border);
+  }
+
+  .egg-shape {
+    width: 30px; height: 38px;
+    background: radial-gradient(circle at 35% 30%, #ffffff, var(--egg-white) 60%, #f2e6c9 100%);
+    border: 2px solid var(--window-border);
+    border-radius: 50% 50% 48% 48% / 62% 62% 42% 42%;
+    cursor: grab;
+    box-shadow: 1px 2px 0 rgba(0,0,0,0.1);
+    touch-action: none;
+  }
+  .egg-shape:active { cursor: grabbing; }
+  .egg-slot-empty {
+    width: 30px; height: 38px;
+    border: 2px dashed #c9b28a;
+    border-radius: 50% 50% 48% 48% / 62% 62% 42% 42%;
+    opacity: 0.5;
+  }
+
+  .pan-item {
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    transition: opacity 0.2s ease;
+    touch-action: none;
+  }
+  .pan-item.used { opacity: 0.3; pointer-events: none; }
+  .pan-item span { font-size: 0.68rem; text-align: center; }
+
+  .dragging-ghost {
+    position: fixed;
+    top: 0; left: 0;
+    width: 60px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.85;
+  }
+
+  /* ---------- stovetop ---------- */
+  .stovetop {
+    background: var(--cream-dark);
+    border: 3px solid var(--window-border);
+  }
+  .burner {
+    position: relative;
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #fff 0%, #ecd9a8 55%, #d8bd82 100%);
+    border: 4px solid var(--burner-dark);
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow 0.15s ease;
+  }
+  .burner.drag-hover { box-shadow: 0 0 0 4px var(--mint) inset; }
+  .burner.has-pan { cursor: pointer; }
+  .burner-rings {
+    position: absolute; inset: 8px;
+    border-radius: 50%;
+    border: 2px dashed #c9a55c;
+    opacity: 0.6;
+  }
+  .pan-on-burner { position: relative; width: 78%; height: 78%; }
+  .pan-on-burner svg { width: 100%; height: 100%; display: block; }
+
+  .burner-badge {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--btn-orange);
+    border: 2px solid var(--btn-orange-dark);
+    color: var(--btn-orange-dark);
+    font-family: 'VT323', monospace;
+    font-size: 0.85rem;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+  .burner-badge.ready { background: var(--mint); }
+
+  /* ---------- steam & bubbles ---------- */
+  .steam {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: rise 1.8s ease-in infinite;
+    opacity: 0;
+  }
+  @keyframes rise {
+    0% { opacity: 0; transform: translate(0,0) scale(0.6); }
+    20% { opacity: 0.9; }
+    100% { opacity: 0; transform: translate(var(--dx,6px), -46px) scale(1.3); }
+  }
+  .bubble {
+    position: absolute;
+    background: rgba(255,255,255,0.75);
+    border-radius: 50%;
+    animation: bubble 1.4s ease-in infinite;
+    opacity: 0;
+  }
+  @keyframes bubble {
+    0% { opacity: 0; transform: translateY(0) scale(0.4); }
+    30% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-30px) scale(1); }
+  }
+
+  /* ---------- modal ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(107, 74, 43, 0.35);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50;
+    padding: 16px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-window { width: 100%; max-width: 380px; }
+  .clouds-bg {
+    background-image:
+      radial-gradient(ellipse 40px 16px at 20% 85%, #fff 60%, transparent 62%),
+      radial-gradient(ellipse 50px 18px at 55% 92%, #fff 60%, transparent 62%),
+      radial-gradient(ellipse 36px 14px at 85% 82%, #fff 60%, transparent 62%);
+    background-color: #ffe9b3;
+  }
+
+  /* ---------- egg character (cooking) ---------- */
+  .egg-character { cursor: pointer; user-select: none; }
+  .crack-line { opacity: 0; transition: opacity 0.15s ease; }
+  .crack-line.show { opacity: 1; }
+
+  /* ---------- toggle switch ---------- */
+  .heat-toggle {
+    display: inline-flex;
+    border: 3px solid var(--btn-orange-dark);
+    overflow: hidden;
+  }
+  .heat-toggle button {
+    padding: 6px 14px;
+    font-weight: 700;
+    background: var(--cream);
+    color: var(--btn-orange-dark);
+    cursor: pointer;
+    border: none;
+  }
+  .heat-toggle button.active { background: var(--btn-orange-dark); color: var(--cream); }
+
+  /* ---------- mess ---------- */
+  #messLayer {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 40;
+  }
+  .mess {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: opacity 2s ease;
+  }
+
+  /* ---------- reopen chip ---------- */
+  #reopenChip {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div id="messLayer"></div>
+
+<div id="gameWindow" class="retro-window pixel-corners w-full max-w-3xl">
+  <div class="title-bar">
+    <span class="title-text vt">Egg Timer &lt;3</span>
+    <div>
+      <button id="minimizeBtn" class="win-btn pixel-corners-sm" aria-label="Minimize">&#8212;</button>
+      <button id="closeBtn" class="win-btn pixel-corners-sm" aria-label="Close">&#10005;</button>
+    </div>
+  </div>
+
+  <div class="window-body p-4 sm:p-6">
+    <div class="flex flex-col md:flex-row gap-4 mb-4">
+      <!-- Egg crate -->
+      <div class="panel pixel-corners-sm p-3 flex-1">
+        <div class="panel-label">Egg Crate</div>
+        <div id="crateGrid" class="grid grid-cols-3 gap-2 justify-items-center mb-2"></div>
+        <button id="refillBtn" class="pastel-btn small pixel-corners-sm">Refill</button>
+      </div>
+
+      <!-- Cookware rack -->
+      <div class="panel pixel-corners-sm p-3 flex-1">
+        <div class="panel-label">Cookware Rack</div>
+        <div id="pansRack" class="flex gap-4 justify-around">
+          <div class="pan-item" data-pan="saucepan">
+            <div id="rackIcon-saucepan"></div>
+            <span>Saucepan</span>
+          </div>
+          <div class="pan-item" data-pan="frying">
+            <div id="rackIcon-frying"></div>
+            <span>Frying Pan</span>
+          </div>
+          <div class="pan-item" data-pan="wide">
+            <div id="rackIcon-wide"></div>
+            <span>Wide Pan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stovetop -->
+    <div class="stovetop pixel-corners-sm p-5">
+      <div class="panel-label text-center">Stovetop</div>
+      <div id="burnersGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-8 justify-items-center pt-2 pb-3"></div>
+    </div>
+
+    <p class="text-center text-xs mt-3 opacity-70">drag a pan onto a burner, then drag an egg into the pan &middot; click a burner with a pan to cook</p>
+  </div>
+</div>
+
+<!-- Burner zoom modal -->
+<div id="burnerModal" class="modal-overlay hidden">
+  <div class="modal-window retro-window pixel-corners">
+    <div class="title-bar">
+      <span class="title-text vt">Egg Timer &lt;3</span>
+      <div>
+        <button id="modalCloseBtn" class="win-btn pixel-corners-sm" aria-label="Close">&#10005;</button>
+      </div>
+    </div>
+    <div id="modalBody" class="p-5"></div>
+  </div>
+</div>
+
+<a href="/" id="backLink" style="position:fixed;bottom:14px;left:16px;color:#6b4a2b;font-family:'Quicksand',sans-serif;font-size:0.8rem;opacity:0.75;text-decoration:none;background:rgba(255,248,231,0.85);padding:4px 10px;border-radius:10px;z-index:70;">&larr; back to portfolio</a>
+
+<div id="reopenChip" class="hidden">
+  <button id="reopenBtn" class="pastel-btn primary pixel-corners-sm vt" style="font-size:1.1rem;">reopen egg timer &lt;3</button>
+</div>
+
+<script>
+/* ==========================================================================
+   EGG TIMER <3 — a small, self-contained, cozy stove-top cooking sim.
+   No dependencies on the rest of the portfolio codebase by design.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------- */
+/* SVG asset builders                                                      */
+/* ---------------------------------------------------------------------- */
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function svg(content, viewBox, extra = "") {
+  return `<svg xmlns="${SVG_NS}" viewBox="${viewBox}" ${extra}>${content}</svg>`;
+}
+
+/** Side-view pan icons for the cookware rack + stovetop. */
+const PAN_SVG = {
+  saucepan: svg(`
+    <rect x="18" y="14" width="34" height="26" rx="3" fill="#e7d2ab" stroke="#8a5a34" stroke-width="3"/>
+    <path d="M18 18 A17 10 0 0 1 52 18" fill="none" stroke="#8a5a34" stroke-width="3"/>
+    <rect x="4" y="20" width="12" height="5" rx="2" fill="#c98a4b" stroke="#8a5a34" stroke-width="2"/>
+    <rect x="54" y="20" width="12" height="5" rx="2" fill="#c98a4b" stroke="#8a5a34" stroke-width="2"/>
+  `, "0 0 70 46", 'width="70" height="46"'),
+  frying: svg(`
+    <ellipse cx="30" cy="26" rx="22" ry="10" fill="#e7d2ab" stroke="#8a5a34" stroke-width="3"/>
+    <rect x="48" y="22" width="30" height="7" rx="3" fill="#c98a4b" stroke="#8a5a34" stroke-width="2"/>
+  `, "0 0 80 40", 'width="80" height="40"'),
+  wide: svg(`
+    <ellipse cx="34" cy="24" rx="28" ry="9" fill="#e7d2ab" stroke="#8a5a34" stroke-width="3"/>
+    <rect x="2" y="19" width="10" height="5" rx="2" fill="#c98a4b" stroke="#8a5a34" stroke-width="2"/>
+    <rect x="56" y="19" width="10" height="5" rx="2" fill="#c98a4b" stroke="#8a5a34" stroke-width="2"/>
+  `, "0 0 68 36", 'width="68" height="36"'),
+};
+
+/** Tiny cracked-yolk dot shown inside a pan once an egg has been added. */
+function yolkDotSVG(seed) {
+  const dx = (seed % 3) * 8 - 8;
+  return `<div style="position:absolute;left:calc(50% + ${dx}px);top:52%;transform:translate(-50%,-50%);">
+    ${svg(`<circle cx="10" cy="10" r="9" fill="#fffaf0" stroke="#8a5a34" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="#f5a623" stroke="#d98a12" stroke-width="1"/>`, "0 0 20 20", 'width="20" height="20"')}
+  </div>`;
+}
+
+/** Cracked-egg "mess" splatted on the floor when a drop is missed. */
+function crackedMessSVG() {
+  return svg(`
+    <ellipse cx="40" cy="30" rx="30" ry="12" fill="#fffaf0" opacity="0.9"/>
+    <circle cx="40" cy="28" r="10" fill="#f5a623"/>
+    <path d="M20 20 L26 10 L30 22 Z" fill="#fffaf0" stroke="#8a5a34" stroke-width="1.5"/>
+    <path d="M58 18 L52 8 L48 20 Z" fill="#fffaf0" stroke="#8a5a34" stroke-width="1.5"/>
+    <path d="M15 30 L8 26 L14 22 Z" fill="#fffaf0" stroke="#8a5a34" stroke-width="1.5"/>
+  `, "0 0 80 46", 'width="80" height="46"');
+}
+
+/** The whole boiling-egg "character" shown mid-cook in a saucepan. Clicking it adds cracks. */
+function boilingEggCharacterSVG(crackClicks) {
+  const cracks = [
+    `<path class="crack-line ${crackClicks >= 1 ? "show" : ""}" d="M40 18 L36 26 L42 32" fill="none" stroke="#8a5a34" stroke-width="1.6"/>`,
+    `<path class="crack-line ${crackClicks >= 2 ? "show" : ""}" d="M52 22 L57 30 L51 36" fill="none" stroke="#8a5a34" stroke-width="1.6"/>`,
+    `<path class="crack-line ${crackClicks >= 3 ? "show" : ""}" d="M30 40 L36 44 L32 52" fill="none" stroke="#8a5a34" stroke-width="1.6"/>`,
+  ].join("");
+  return svg(`
+    <ellipse cx="45" cy="45" rx="34" ry="40" fill="#fffaf0" stroke="#8a5a34" stroke-width="3"/>
+    <rect x="12" y="38" width="66" height="14" fill="#f7ad78" opacity="0.85"/>
+    <circle cx="34" cy="34" r="2.6" fill="#6b4a2b"/>
+    <circle cx="56" cy="34" r="2.6" fill="#6b4a2b"/>
+    <path d="M36 58 Q45 64 54 58" fill="none" stroke="#6b4a2b" stroke-width="2.4" stroke-linecap="round"/>
+    ${cracks}
+  `, "0 0 90 90", 'width="120" height="120"');
+}
+
+/** Finished-egg hero art, one per pan type — cute minimalist faces throughout. */
+function finishedEggSVG(panType) {
+  if (panType === "saucepan") {
+    return svg(`
+      <path d="M60 8 C30 8 14 42 14 76 C14 106 34 128 60 128 C86 128 106 106 106 76 C106 42 90 8 60 8 Z"
+        fill="#fffaf0" stroke="#8a5a34" stroke-width="4"/>
+      <path d="M34 30 L52 24 L46 42 L64 34 L58 52" fill="none" stroke="#8a5a34" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M40 50 C40 40 80 40 80 50 C86 62 80 96 60 100 C40 96 34 62 40 50 Z" fill="#f5a623"/>
+      <path d="M52 96 C56 104 64 104 68 96" fill="none" stroke="#d98a12" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="50" cy="70" r="3.2" fill="#6b4a2b"/>
+      <circle cx="70" cy="70" r="3.2" fill="#6b4a2b"/>
+      <path d="M52 82 Q60 88 68 82" fill="none" stroke="#6b4a2b" stroke-width="2.6" stroke-linecap="round"/>
+    `, "0 0 120 136", 'width="160" height="176"');
+  }
+  if (panType === "frying") {
+    return svg(`
+      <path d="M20 70 C10 40 40 20 70 26 C100 32 112 60 100 88 C88 114 50 118 30 100 C14 86 24 84 20 70 Z"
+        fill="#fffaf0" stroke="#8a5a34" stroke-width="4"/>
+      <ellipse cx="64" cy="68" rx="26" ry="24" fill="#f5a623" stroke="#d98a12" stroke-width="2"/>
+      <circle cx="54" cy="62" r="3" fill="#6b4a2b"/>
+      <circle cx="74" cy="62" r="3" fill="#6b4a2b"/>
+      <path d="M54 76 Q64 84 74 76" fill="none" stroke="#6b4a2b" stroke-width="2.6" stroke-linecap="round"/>
+    `, "0 0 120 130", 'width="170" height="184"');
+  }
+  /* wide / poached */
+  return svg(`
+    <ellipse cx="60" cy="70" rx="52" ry="34" fill="#fffaf0" stroke="#8a5a34" stroke-width="4"/>
+    <ellipse cx="62" cy="70" rx="20" ry="17" fill="#f5a623" stroke="#d98a12" stroke-width="2"/>
+    <circle cx="54" cy="65" r="2.8" fill="#6b4a2b"/>
+    <circle cx="70" cy="65" r="2.8" fill="#6b4a2b"/>
+    <path d="M54 76 Q62 82 70 76" fill="none" stroke="#6b4a2b" stroke-width="2.4" stroke-linecap="round"/>
+  `, "0 0 120 110", 'width="170" height="156"');
+}
+
+/* ---------------------------------------------------------------------- */
+/* Static game data                                                        */
+/* ---------------------------------------------------------------------- */
+
+const PAN_INFO = {
+  saucepan: { label: "Saucepan", recommendedMinutes: 6, recommendedText: "6:00 — Soft Boiled" },
+  frying: { label: "Frying Pan", recommendedMinutes: 3, recommendedText: "3:00 — Fried Egg" },
+  wide: { label: "Wide Pan", recommendedMinutes: 4, recommendedText: "4:00 — Poached Egg" },
+};
+
+/* ---------------------------------------------------------------------- */
+/* State                                                                    */
+/* ---------------------------------------------------------------------- */
+
+const state = {
+  eggCount: 6,
+  burners: [0, 1, 2, 3].map(() => ({
+    pan: null,          // null | 'saucepan' | 'frying' | 'wide'
+    eggCount: 0,
+    heat: "low",        // 'low' | 'high'
+    timeMinutes: 3,
+    remainingSeconds: 0,
+    cookingState: "idle", // 'idle' | 'cooking' | 'done'
+    crackClicks: 0,
+    intervalId: null,
+  })),
+  activeBurner: null,
+};
+
+/* ---------------------------------------------------------------------- */
+/* Rendering: pantry (crate + rack)                                        */
+/* ---------------------------------------------------------------------- */
+
+function renderCrate() {
+  const grid = document.getElementById("crateGrid");
+  grid.innerHTML = "";
+  for (let i = 0; i < 6; i++) {
+    const el = document.createElement("div");
+    if (i < state.eggCount) {
+      el.className = "egg-shape";
+      el.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        startDrag("egg", {}, e.clientX, e.clientY, '<div class="egg-shape"></div>');
+      });
+    } else {
+      el.className = "egg-slot-empty";
+    }
+    grid.appendChild(el);
+  }
+}
+
+function renderRackIcons() {
+  document.getElementById("rackIcon-saucepan").innerHTML = PAN_SVG.saucepan;
+  document.getElementById("rackIcon-frying").innerHTML = PAN_SVG.frying;
+  document.getElementById("rackIcon-wide").innerHTML = PAN_SVG.wide;
+}
+
+function refreshRackAvailability() {
+  document.querySelectorAll(".pan-item").forEach((item) => {
+    const type = item.dataset.pan;
+    const inUse = state.burners.some((b) => b.pan === type);
+    item.classList.toggle("used", inUse);
+  });
+}
+
+/* ---------------------------------------------------------------------- */
+/* Rendering: stovetop + burners                                           */
+/* ---------------------------------------------------------------------- */
+
+function renderBurners() {
+  const grid = document.getElementById("burnersGrid");
+  grid.innerHTML = "";
+  state.burners.forEach((burner, idx) => {
+    const el = document.createElement("div");
+    el.className = "burner" + (burner.pan ? " has-pan" : "");
+    el.dataset.burner = String(idx);
+    el.innerHTML = `<div class="burner-rings"></div>`;
+
+    if (burner.pan) {
+      const panWrap = document.createElement("div");
+      panWrap.className = "pan-on-burner";
+      panWrap.dataset.burner = String(idx);
+      panWrap.innerHTML = PAN_SVG[burner.pan];
+      for (let e = 0; e < burner.eggCount; e++) {
+        panWrap.insertAdjacentHTML("beforeend", yolkDotSVG(e));
+      }
+      el.appendChild(panWrap);
+
+      if (burner.cookingState === "cooking") {
+        addSteamAndBubbles(el, burner);
+        const badge = document.createElement("div");
+        badge.className = "burner-badge vt";
+        badge.textContent = formatTime(burner.remainingSeconds);
+        el.appendChild(badge);
+      } else if (burner.cookingState === "done") {
+        const badge = document.createElement("div");
+        badge.className = "burner-badge ready vt";
+        badge.textContent = "ready!";
+        el.appendChild(badge);
+      }
+
+      el.addEventListener("click", () => openBurnerModal(idx));
+    }
+
+    grid.appendChild(el);
+  });
+}
+
+function addSteamAndBubbles(burnerEl, burner) {
+  const count = burner.pan === "saucepan" ? 4 : 3;
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement("div");
+    s.className = burner.pan === "saucepan" ? "bubble" : "steam";
+    const left = 30 + Math.random() * 40;
+    s.style.left = left + "%";
+    s.style.bottom = "38%";
+    s.style.setProperty("--dx", (Math.random() * 12 - 6) + "px");
+    s.style.width = s.style.height = burner.pan === "saucepan" ? "5px" : "5px";
+    s.style.animationDelay = (i * 0.35) + "s";
+    burnerEl.appendChild(s);
+  }
+}
+
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Drag & drop — implemented with pointer events (works for mouse & touch) */
+/* ---------------------------------------------------------------------- */
+
+let activeDrag = null; // { type: 'egg'|'pan', pan?, ghostEl, startX, startY }
+const DRAG_THRESHOLD = 6; // px — below this, treat pointerup as a non-drag click
+
+function startDrag(type, extra, x, y, sourceHTML) {
+  const ghost = document.createElement("div");
+  ghost.className = "dragging-ghost";
+  ghost.innerHTML = sourceHTML;
+  ghost.style.left = x + "px";
+  ghost.style.top = y + "px";
+  document.body.appendChild(ghost);
+  activeDrag = { type, ...extra, ghostEl: ghost, startX: x, startY: y };
+}
+
+document.querySelectorAll(".pan-item").forEach((item) => {
+  item.addEventListener("pointerdown", (e) => {
+    if (item.classList.contains("used")) return;
+    e.preventDefault();
+    startDrag("pan", { pan: item.dataset.pan }, e.clientX, e.clientY, PAN_SVG[item.dataset.pan]);
+  });
+});
+
+document.addEventListener("pointermove", (e) => {
+  if (!activeDrag) return;
+  activeDrag.ghostEl.style.left = e.clientX + "px";
+  activeDrag.ghostEl.style.top = e.clientY + "px";
+
+  activeDrag.ghostEl.style.visibility = "hidden";
+  const hovered = document.elementFromPoint(e.clientX, e.clientY);
+  activeDrag.ghostEl.style.visibility = "visible";
+  document.querySelectorAll(".burner.drag-hover").forEach((b) => b.classList.remove("drag-hover"));
+  const burnerEl = hovered && hovered.closest(".burner");
+  if (burnerEl) burnerEl.classList.add("drag-hover");
+});
+
+document.addEventListener("pointerup", (e) => {
+  if (!activeDrag) return;
+  const { type, pan, ghostEl, startX, startY } = activeDrag;
+  document.querySelectorAll(".burner.drag-hover").forEach((b) => b.classList.remove("drag-hover"));
+  ghostEl.remove();
+  activeDrag = null;
+
+  const moved = Math.hypot(e.clientX - startX, e.clientY - startY);
+  if (moved < DRAG_THRESHOLD) return; // treat as an accidental click, not a drop
+
+  const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+
+  if (type === "pan") {
+    const burnerEl = dropTarget && dropTarget.closest(".burner");
+    if (burnerEl) {
+      const idx = Number(burnerEl.dataset.burner);
+      if (!state.burners[idx].pan) placePanOnBurner(idx, pan);
+    }
+    return;
+  }
+
+  if (type === "egg") {
+    const panEl = dropTarget && dropTarget.closest(".pan-on-burner");
+    if (panEl) {
+      addEggToPan(Number(panEl.dataset.burner));
+    } else {
+      crackEggOnFloor(e.clientX, e.clientY);
+    }
+  }
+});
+
+function placePanOnBurner(idx, panType) {
+  // Only one of each pan exists — if it's already on a burner, ignore.
+  if (state.burners.some((b) => b.pan === panType)) return;
+  state.burners[idx].pan = panType;
+  state.burners[idx].timeMinutes = PAN_INFO[panType].recommendedMinutes;
+  renderBurners();
+  refreshRackAvailability();
+}
+
+function addEggToPan(idx) {
+  if (state.eggCount <= 0) return;
+  const burner = state.burners[idx];
+  if (!burner.pan || burner.cookingState !== "idle") return;
+  state.eggCount -= 1;
+  burner.eggCount += 1;
+  renderCrate();
+  renderBurners();
+}
+
+function crackEggOnFloor(x, y) {
+  if (state.eggCount <= 0) return;
+  state.eggCount -= 1;
+  renderCrate();
+
+  const mess = document.createElement("div");
+  mess.className = "mess";
+  mess.style.left = x + "px";
+  mess.style.top = y + "px";
+  mess.innerHTML = crackedMessSVG();
+  document.getElementById("messLayer").appendChild(mess);
+
+  setTimeout(() => { mess.style.opacity = "0"; }, 2000);
+  setTimeout(() => { mess.remove(); }, 2500);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Burner zoom modal                                                       */
+/* ---------------------------------------------------------------------- */
+
+const modalOverlay = document.getElementById("burnerModal");
+const modalBody = document.getElementById("modalBody");
+
+function openBurnerModal(idx) {
+  state.activeBurner = idx;
+  modalOverlay.classList.remove("hidden");
+  renderModal();
+}
+
+function closeBurnerModal() {
+  modalOverlay.classList.add("hidden");
+  state.activeBurner = null;
+}
+
+function renderModal() {
+  const burner = state.burners[state.activeBurner];
+  if (!burner) return;
+
+  if (burner.cookingState === "done") {
+    renderDoneScreen(burner);
+  } else if (burner.cookingState === "cooking") {
+    renderCookingScreen(burner);
+  } else {
+    renderSetupScreen(burner);
+  }
+}
+
+function renderSetupScreen(burner) {
+  const info = PAN_INFO[burner.pan];
+  modalBody.innerHTML = `
+    <p class="panel-label" style="font-size:1.2rem;">${info.label}</p>
+    <p class="text-sm mb-3">Recommended time: <strong>${info.recommendedText}</strong></p>
+
+    <div class="mb-4">
+      <p class="text-sm mb-1">Heat level</p>
+      <div class="heat-toggle pixel-corners-sm">
+        <button id="heatLow" class="${burner.heat === "low" ? "active" : ""}">Low</button>
+        <button id="heatHigh" class="${burner.heat === "high" ? "active" : ""}">High</button>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="text-sm block mb-1" for="timeInput">Cook time (minutes)</label>
+      <input id="timeInput" type="number" min="0.5" max="15" step="0.5"
+        value="${burner.timeMinutes}"
+        class="pixel-corners-sm border-2 border-[var(--btn-orange-dark)] px-2 py-1 w-24 bg-white" />
+    </div>
+
+    <p class="text-xs mb-4 opacity-70">${burner.eggCount} egg${burner.eggCount === 1 ? "" : "s"} in the pan</p>
+
+    <button id="startCookingBtn" class="pastel-btn primary pixel-corners-sm w-full" ${burner.eggCount === 0 ? "disabled" : ""}>
+      Turn On / Start Cooking
+    </button>
+    ${burner.eggCount === 0 ? '<p class="text-xs mt-2 text-center opacity-70">crack an egg into the pan first!</p>' : ""}
+  `;
+
+  document.getElementById("heatLow").onclick = () => { burner.heat = "low"; renderModal(); };
+  document.getElementById("heatHigh").onclick = () => { burner.heat = "high"; renderModal(); };
+  document.getElementById("timeInput").oninput = (e) => {
+    burner.timeMinutes = Math.max(0.5, Number(e.target.value) || 0.5);
+  };
+  const startBtn = document.getElementById("startCookingBtn");
+  if (startBtn) startBtn.onclick = () => startCooking(burner);
+}
+
+function startCooking(burner) {
+  burner.remainingSeconds = Math.round(burner.timeMinutes * 60);
+  burner.cookingState = "cooking";
+  burner.crackClicks = 0;
+  renderModal();
+  renderBurners();
+  burner.intervalId = setInterval(() => tickCooking(burner), 1000);
+}
+
+function tickCooking(burner) {
+  const dec = burner.heat === "high" ? 2 : 1;
+  burner.remainingSeconds = Math.max(0, burner.remainingSeconds - dec);
+
+  if (state.activeBurner !== null && state.burners[state.activeBurner] === burner) {
+    const timerEl = document.getElementById("cookingTimer");
+    if (timerEl) timerEl.textContent = formatTime(burner.remainingSeconds);
+  }
+  updateBurnerBadge(burner);
+
+  if (burner.remainingSeconds <= 0) {
+    clearInterval(burner.intervalId);
+    burner.cookingState = "done";
+    renderBurners();
+    if (state.activeBurner !== null && state.burners[state.activeBurner] === burner) {
+      renderModal();
+    }
+  }
+}
+
+function updateBurnerBadge(burner) {
+  const idx = state.burners.indexOf(burner);
+  const burnerEl = document.querySelector(`.burner[data-burner="${idx}"]`);
+  const badge = burnerEl && burnerEl.querySelector(".burner-badge");
+  if (badge) badge.textContent = formatTime(burner.remainingSeconds);
+}
+
+function renderCookingScreen(burner) {
+  const info = PAN_INFO[burner.pan];
+  modalBody.innerHTML = `
+    <div class="clouds-bg pixel-corners-sm flex flex-col items-center justify-center py-6 mb-4" style="min-height:220px;">
+      <p class="text-sm mb-2">Your egg is ready in..</p>
+      ${burner.pan === "saucepan"
+        ? `<div id="boilingEgg" class="egg-character">${boilingEggCharacterSVG(burner.crackClicks)}</div>`
+        : `<div>${PAN_SVG[burner.pan]}</div>`}
+      <p id="cookingTimer" class="vt" style="font-size:2.6rem;color:var(--btn-orange-dark);">${formatTime(burner.remainingSeconds)}</p>
+    </div>
+    <p class="text-xs text-center opacity-70">${info.label} &middot; ${burner.heat === "high" ? "High" : "Low"} heat</p>
+    ${burner.pan === "saucepan" ? '<p class="text-xs text-center opacity-60 mt-1">psst.. click the egg :)</p>' : ""}
+  `;
+
+  if (burner.pan === "saucepan") {
+    const eggEl = document.getElementById("boilingEgg");
+    eggEl.onclick = () => {
+      burner.crackClicks = Math.min(3, burner.crackClicks + 1);
+      eggEl.innerHTML = boilingEggCharacterSVG(burner.crackClicks);
+    };
+  }
+}
+
+function renderDoneScreen(burner) {
+  modalBody.innerHTML = `
+    <div class="clouds-bg pixel-corners-sm flex flex-col items-center justify-center py-6 mb-4" style="min-height:240px;">
+      <p class="text-base font-bold mb-2">Your egg is done!</p>
+      <div>${finishedEggSVG(burner.pan)}</div>
+    </div>
+    <div class="flex gap-3">
+      <button id="snoozeBtn" class="pastel-btn pixel-corners-sm flex-1">Snooze</button>
+      <button id="closeResultBtn" class="pastel-btn primary pixel-corners-sm flex-1">Close</button>
+    </div>
+  `;
+  document.getElementById("snoozeBtn").onclick = () => snoozeBurner(burner);
+  document.getElementById("closeResultBtn").onclick = () => closeResult(burner);
+}
+
+function snoozeBurner(burner) {
+  burner.remainingSeconds = 60;
+  burner.cookingState = "cooking";
+  renderModal();
+  renderBurners();
+  burner.intervalId = setInterval(() => tickCooking(burner), 1000);
+}
+
+function closeResult(burner) {
+  // Egg is eaten — pan stays put, ready for another round.
+  burner.eggCount = 0;
+  burner.cookingState = "idle";
+  burner.crackClicks = 0;
+  closeBurnerModal();
+  renderBurners();
+}
+
+document.getElementById("modalCloseBtn").addEventListener("click", closeBurnerModal);
+modalOverlay.addEventListener("click", (e) => {
+  if (e.target === modalOverlay) closeBurnerModal();
+});
+
+/* ---------------------------------------------------------------------- */
+/* Refill + window chrome (minimize / close)                               */
+/* ---------------------------------------------------------------------- */
+
+document.getElementById("refillBtn").addEventListener("click", () => {
+  state.eggCount = 6;
+  renderCrate();
+});
+
+const gameWindow = document.getElementById("gameWindow");
+document.getElementById("minimizeBtn").addEventListener("click", () => {
+  gameWindow.classList.toggle("minimized");
+});
+document.getElementById("closeBtn").addEventListener("click", () => {
+  gameWindow.classList.add("closed");
+  document.getElementById("reopenChip").classList.remove("hidden");
+});
+document.getElementById("reopenBtn").addEventListener("click", () => {
+  gameWindow.classList.remove("closed");
+  document.getElementById("reopenChip").classList.add("hidden");
+});
+
+/* ---------------------------------------------------------------------- */
+/* Boot                                                                     */
+/* ---------------------------------------------------------------------- */
+
+renderRackIcons();
+renderCrate();
+renderBurners();
+refreshRackAvailability();
+</script>
+</body>
+</html>
