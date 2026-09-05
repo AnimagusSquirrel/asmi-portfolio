@@ -3,6 +3,7 @@ import { DM_Sans, Sanchez } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import HeheButton from "@/components/shared/HeheButton";
 import "./globals.css";
 
 
@@ -55,6 +56,7 @@ export default function RootLayout({
           <Navbar />
           <main>{children}</main>
           <Footer />
+          <HeheButton />
         </Providers>
       </body>
     </html>
