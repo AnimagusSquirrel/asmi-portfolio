@@ -85,6 +85,40 @@ export const projects: Project[] = [
     archived: false,
   },
 
+  {
+    slug: "guwahati_transit",
+
+    image: "/images/projects/cc.png",
+
+    title: "Guwahati Transit",
+
+    description:
+      "Placeholder — Guwahati Transit case study.",
+
+    role: "UX Design",
+    product: "Case Study",
+    duration: "TBD",
+    featured: false,
+    archived: false,
+  },
+
+  {
+    slug: "side_quests_on_campus",
+
+    image: "/images/projects/cc.png",
+
+    title: "Side Quests on Campus",
+
+    description:
+      "Placeholder — Side Quests on Campus case study.",
+
+    role: "UX Design",
+    product: "Case Study",
+    duration: "TBD",
+    featured: false,
+    archived: false,
+  },
+
   // ==========================================================
   // Project 3
   // ==========================================================
